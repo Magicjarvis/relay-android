@@ -1,0 +1,72 @@
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@android:color/transparent"
+    android:paddingTop="5dp"
+    android:paddingBottom="5dp"
+    android:paddingLeft="10dp"
+    android:paddingRight="10dp">
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        android:background="@drawable/rounded_list_item"
+        android:layout_toRightOf="@+id/dashboard_right"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+
+        <com.android.volley.toolbox.NetworkImageView
+            android:id="@+id/relay_image"
+            android:background="@android:color/darker_gray"
+            android:layout_width="match_parent"
+            android:adjustViewBounds="true"
+            android:minHeight="150dp"
+            android:layout_height="wrap_content" />
+
+        <RelativeLayout
+            android:layout_below="@id/relay_image"
+            android:padding="8dp"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <TextView
+                android:id="@+id/relay_title"
+                android:text="Why Microsoft Is Afraid"
+                android:textStyle="bold"
+                android:textColor="@color/dark_gray"
+                android:textSize="20dp"
+                android:paddingTop="2dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <TextView
+                android:id="@+id/relay_site"
+                android:text="The Verge"
+                android:textColor="@color/dark_gray"
+                android:layout_below="@+id/relay_title"
+                android:textSize="17dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/relay_description"
+                android:text="As it turns out, there is a lot of fear recently from Microsoft. Unexpectedly..."
+                android:layout_below="@+id/relay_site"
+                android:textSize="13dp"
+                android:textColor="@color/dark_gray"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+            <TextView
+                android:id="@+id/relay_people"
+                android:text="Jarvis"
+                android:textColor="@android:color/darker_gray"
+                android:layout_alignParentRight="true"
+                android:layout_below="@+id/relay_description"
+                android:textStyle="italic"
+                android:textSize="15dp"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+        </RelativeLayout>
+    </RelativeLayout>
+
+</RelativeLayout>
