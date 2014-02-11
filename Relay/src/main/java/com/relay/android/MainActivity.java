@@ -2,6 +2,8 @@ package com.relay.android;
 
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -33,20 +35,12 @@ public class MainActivity extends ActionBarActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private static String mUsername;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mNavigationDrawerFragment = (NavigationDrawerFragment)
-                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
-        mTitle = getTitle();
-
-        // Set up the drawer.
-        mNavigationDrawerFragment.setUp(
-                R.id.navigation_drawer,
-                (DrawerLayout) findViewById(R.id.drawer_layout));
 
 
         // Get intent, action and MIME type
@@ -67,15 +61,32 @@ public class MainActivity extends ActionBarActivity
         } else {
             // Handle other intents, such as being started from the home screen
         }
+
+        mNavigationDrawerFragment = (NavigationDrawerFragment)
+                getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mTitle = getTitle();
+
+        // Set up the drawer.
+        mNavigationDrawerFragment.setUp(
+                R.id.navigation_drawer,
+                (DrawerLayout) findViewById(R.id.drawer_layout));
+
+
+
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
         // update the main content by replacing fragments
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (prefs.contains("username")) {
+            mUsername = prefs.getString("username", "");
+        }
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (position == 0) {
+            Log.i("jarvis", "i'm starting the transaction");
             fragmentManager.beginTransaction()
-                    .replace(R.id.container, RelayListFragment.newInstance(RelayListFragment.Direction.TO), "Received")
+                    .replace(R.id.container, RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO), "Received")
                     .commit();
             return;
         }
@@ -156,9 +167,9 @@ public class MainActivity extends ActionBarActivity
          */
         public static Fragment newInstance(int sectionNumber) {
             if (sectionNumber == 1) {
-                return RelayListFragment.newInstance(RelayListFragment.Direction.TO);
+                return RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO);
             } else if (sectionNumber == 2) {
-                return RelayListFragment.newInstance(RelayListFragment.Direction.FROM);
+                return RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.FROM);
             }
             PlaceholderFragment fragment = new PlaceholderFragment();
             Bundle args = new Bundle();

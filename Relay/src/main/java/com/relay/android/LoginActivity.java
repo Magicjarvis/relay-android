@@ -1,6 +1,8 @@
 package com.relay.android;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
@@ -43,6 +45,10 @@ public class LoginActivity extends ActionBarActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        if (prefs.contains("username")) {
+            startActivity(new Intent(getApplicationContext(), MainActivity.class));
+        }
 
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
@@ -99,7 +105,7 @@ public class LoginActivity extends ActionBarActivity {
 
         public void tryLogin(final String username) {
             StringRequest sr = new StringRequest(Request.Method.POST,
-                    "http://relay-links.appspot.com/relays", new Response.Listener<String>() {
+                    "http://relay-links.appspot.com/login", new Response.Listener<String>() {
                 @Override
                 public void onResponse(String s) {
                     boolean success = false;
@@ -111,7 +117,7 @@ public class LoginActivity extends ActionBarActivity {
                     }
                     if (success) {
                         Intent i = new Intent(getActivity().getApplicationContext(), MainActivity.class);
-                        i.putExtra("username", username);
+                        PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit().putString("username", username).commit();
                         startActivity(i);
                     } else {
                         Toast.makeText(getActivity().getApplicationContext(), "WRONG", Toast.LENGTH_SHORT).show();

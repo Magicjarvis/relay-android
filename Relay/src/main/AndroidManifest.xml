@@ -17,11 +17,7 @@
         <activity
             android:name="com.relay.android.MainActivity"
             android:label="@string/app_name" >
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
 
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -33,6 +29,11 @@
         <activity
             android:name="com.relay.android.LoginActivity"
             android:label="@string/title_activity_login" >
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
         </activity>
     </application>
 

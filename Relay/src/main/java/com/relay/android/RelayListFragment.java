@@ -31,10 +31,10 @@ public class RelayListFragment extends Fragment {
     public RelayListFragment(){
        // this is required
     }
-    public static RelayListFragment newInstance(Direction d) {
+    public static RelayListFragment newInstance(String username, Direction d) {
         RelayListFragment f = new RelayListFragment();
         // use bundle args TODO
-        String url = String.format("http://relay-links.appspot.com/relays/%s/atom", d == Direction.FROM ? "from" : "to");
+        String url = String.format("http://relay-links.appspot.com/relays/%s/%s", d == Direction.FROM ? "from" : "to", username);
         f.setUrl(url);
         return f;
     }
@@ -76,7 +76,7 @@ public class RelayListFragment extends Fragment {
     }
 
     public void loadRelays() {
-        Log.i("Jarvis", "calling loadRelays()");
+        Log.i("Jarvis", "calling loadRelays() at "+url);
         mRequestQueue.add(
                 new GsonRequest<RelayList>(url,
                         RelayList.class, null, new Response.Listener<RelayList>() {
