@@ -28,5 +28,5 @@ dependencies {
 }
 
 dependencies {
-    	compile files('libs/gson-2.2.4.jar', 'libs/volley.jar')
+    compile files('libs/gson-2.2.4.jar', 'libs/volley.jar')
 }

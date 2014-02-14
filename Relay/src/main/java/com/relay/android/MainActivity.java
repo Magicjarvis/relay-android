@@ -42,25 +42,9 @@ public class MainActivity extends ActionBarActivity
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
+        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+        mUsername = prefs.getString("username", null);
 
-        // Get intent, action and MIME type
-        Intent intent = getIntent();
-        String action = intent.getAction();
-        String type = intent.getType();
-
-        if (Intent.ACTION_SEND.equals(action) && type != null) {
-            if ("text/plain".equals(type)) {
-                String sharedText = intent.getStringExtra(Intent.EXTRA_TEXT);
-                if (sharedText != null) {
-                    Intent i = new Intent(this, SendActivity.class);
-                    i.putExtra("url", sharedText);
-                    startActivityForResult(i, 5);
-                    // Update UI to reflect text being shared
-                }
-            }
-        } else {
-            // Handle other intents, such as being started from the home screen
-        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -71,12 +55,24 @@ public class MainActivity extends ActionBarActivity
                 R.id.navigation_drawer,
                 (DrawerLayout) findViewById(R.id.drawer_layout));
 
+        FragmentManager fragmentManager = getSupportFragmentManager();
+        fragmentManager.beginTransaction()
+                .replace(R.id.container, RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO), "Received")
+                .commit();
+    }
 
-
+    @Override
+    protected void onResume() {
+        super.onResume();
+        RelayListFragment f = (RelayListFragment) mNavigationDrawerFragment.getFragmentManager().findFragmentByTag("Received");
+        f.loadRelays();
     }
 
     @Override
     public void onNavigationDrawerItemSelected(int position) {
+        if (mNavigationDrawerFragment == null) {
+            return;
+        }
         // update the main content by replacing fragments
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("username")) {
@@ -84,7 +80,6 @@ public class MainActivity extends ActionBarActivity
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
         if (position == 0) {
-            Log.i("jarvis", "i'm starting the transaction");
             fragmentManager.beginTransaction()
                     .replace(R.id.container, RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO), "Received")
                     .commit();
@@ -95,14 +90,7 @@ public class MainActivity extends ActionBarActivity
                 .commit();
     }
 
-    @Override
-    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == 5) {
-            RelayListFragment f = (RelayListFragment) mNavigationDrawerFragment.getFragmentManager().findFragmentByTag("Received");
-            f.loadRelays();
-        }
-    }
+
 
     public void onSectionAttached(int number) {
         switch (number) {
@@ -128,7 +116,7 @@ public class MainActivity extends ActionBarActivity
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-        if (!mNavigationDrawerFragment.isDrawerOpen()) {
+        if (mNavigationDrawerFragment!= null && !mNavigationDrawerFragment.isDrawerOpen()) {
             // Only show items in the action bar relevant to this screen
             // if the drawer is not showing. Otherwise, let the drawer
             // decide what to show in the action bar.
@@ -146,6 +134,12 @@ public class MainActivity extends ActionBarActivity
         // as you specify a parent activity in AndroidManifest.xml.
         int id = item.getItemId();
         if (id == R.id.action_settings) {
+            return true;
+        } else if (id == R.id.action_logout) {
+            SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            sp.edit().remove("username").commit();
+            startActivity(new Intent(this, LoginActivity.class));
+            finish();
             return true;
         }
         return super.onOptionsItemSelected(item);

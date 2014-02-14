@@ -5,9 +5,11 @@ import android.app.ListActivity;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -74,15 +76,11 @@ public class SendActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                setProgressBarIndeterminateVisibility(true);
                 StringRequest sr = new StringRequest(Request.Method.POST,
                         "http://relay-links.appspot.com/relays", new Response.Listener<String>() {
                     @Override
                     public void onResponse(String s) {
-                        Log.i("VolleyGirl", s);
-                        setProgressBarIndeterminateVisibility(false);
-                        setResult(5);
-                        finish();
+                        Toast.makeText(getBaseContext(), "Relay Sent!", Toast.LENGTH_SHORT).show();
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -92,8 +90,10 @@ public class SendActivity extends Activity {
                 }) {
                     @Override
                     protected Map<String, String> getParams() throws AuthFailureError {
+                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+                        String username = prefs.getString("username", "Error");
                         Map<String,String> params = new HashMap<String, String>();
-                        params.put("sender","atom");
+                        params.put("sender", username);
                         params.put("url",url);
                         params.put("recipients", TextUtils.join(",", mSelected));
                         return params;
@@ -102,8 +102,9 @@ public class SendActivity extends Activity {
                 };
 
                 mRequestQueue.add(sr);
-                Log.i("Jarvis", "Adding a relay for: "+ url);
+                Log.i("Jarvis", "Adding a relay for: " + url);
                 button.setClickable(false);
+                finish();
             }
         });
         lv.setBackgroundColor(Color.BLACK);

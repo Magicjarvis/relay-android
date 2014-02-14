@@ -45,14 +45,9 @@ public class LoginActivity extends ActionBarActivity {
                 WindowManager.LayoutParams.FLAG_FULLSCREEN);
         setContentView(R.layout.activity_login);
 
-        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-        if (prefs.contains("username")) {
-            startActivity(new Intent(getApplicationContext(), MainActivity.class));
-        }
-
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, new PlaceholderFragment())
+                    .add(R.id.login_container, new LoginFragment())
                     .commit();
         }
     }
@@ -81,10 +76,10 @@ public class LoginActivity extends ActionBarActivity {
     /**
      * A placeholder fragment containing a simple view.
      */
-    public static class PlaceholderFragment extends Fragment {
+    public static class LoginFragment extends Fragment {
         private RequestQueue mRequestQueue;
 
-        public PlaceholderFragment() {
+        public LoginFragment() {
         }
 
         @Override
