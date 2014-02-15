@@ -124,7 +124,12 @@ public class RelayListFragment extends Fragment {
                     @Override
                     public void onResponse(RelayList relayList) {
                         Log.i("jarfish", relayList.toString());
-                        mListView.setAdapter(new RelayAdapter(getActivity().getApplicationContext(), relayList.getRelays()));
+                        if (mListView.getAdapter() != null) {
+                            RelayAdapter adapter = (RelayAdapter) mListView.getAdapter();
+                            adapter.handleRefresh(relayList);
+                        } else {
+                            mListView.setAdapter(new RelayAdapter(getActivity().getApplicationContext(), relayList.getRelays()));
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override

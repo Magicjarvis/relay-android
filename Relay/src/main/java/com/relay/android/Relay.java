@@ -122,4 +122,8 @@ public class Relay {
     public String toString() {
         return url;
     }
+    public boolean equals(Object o) {
+        Relay other = (Relay) o;
+        return url.equalsIgnoreCase(other.getUrl());
+    }
 }

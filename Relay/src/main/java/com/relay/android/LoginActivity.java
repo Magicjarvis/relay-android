@@ -1,5 +1,6 @@
 package com.relay.android;
 
+import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
@@ -88,11 +89,12 @@ public class LoginActivity extends ActionBarActivity {
             mRequestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
             View rootView = inflater.inflate(R.layout.fragment_login, container, false);
             final TextView username = (TextView) rootView.findViewById(R.id.username);
-            View button = (View) rootView.findViewById(R.id.login_button);
+            final View button = (View) rootView.findViewById(R.id.login_button);
             button.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     tryLogin(username.getText().toString());
+                    button.setClickable(false);
                 }
             });
             return rootView;
@@ -114,6 +116,7 @@ public class LoginActivity extends ActionBarActivity {
                         Intent i = new Intent(getActivity().getApplicationContext(), MainActivity.class);
                         PreferenceManager.getDefaultSharedPreferences(getActivity().getApplicationContext()).edit().putString("username", username).commit();
                         startActivity(i);
+                        getActivity().finish();
                     } else {
                         Toast.makeText(getActivity().getApplicationContext(), "WRONG", Toast.LENGTH_SHORT).show();
                     }
@@ -128,6 +131,11 @@ public class LoginActivity extends ActionBarActivity {
                 @Override
                 protected Map<String, String> getParams() throws AuthFailureError {
                     Map<String,String> params = new HashMap<String, String>();
+                    SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences(RootActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+                    String regid = prefs.getString(RootActivity.PROPERTY_REG_ID, null);
+                    if (regid != null) {
+                        params.put("gcm_id", regid);
+                    }
                     params.put("username", username);
                     params.put("password","password");
                     return params;

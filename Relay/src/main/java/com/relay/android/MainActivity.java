@@ -8,20 +8,13 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
-import android.content.Context;
-import android.os.Build;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-import android.widget.ArrayAdapter;
-import android.widget.TextView;
-import android.widget.Toast;
 
 public class MainActivity extends ActionBarActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -65,7 +58,9 @@ public class MainActivity extends ActionBarActivity
     protected void onResume() {
         super.onResume();
         RelayListFragment f = (RelayListFragment) mNavigationDrawerFragment.getFragmentManager().findFragmentByTag("Received");
-        f.loadRelays();
+        if (f != null) {
+            f.loadRelays();
+        }
     }
 
     @Override
@@ -89,7 +84,6 @@ public class MainActivity extends ActionBarActivity
                 .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
                 .commit();
     }
-
 
 
     public void onSectionAttached(int number) {
