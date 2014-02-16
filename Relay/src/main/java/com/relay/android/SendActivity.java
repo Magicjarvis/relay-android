@@ -40,9 +40,8 @@ import java.util.Map;
 /**
  * Created by jarvis on 12/5/13.
  */
-public class SendActivity extends Activity {
+public class SendActivity extends RelayActivity {
     private String url;
-    private RequestQueue mRequestQueue;
     private List<String> mSelected;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,7 +50,6 @@ public class SendActivity extends Activity {
         setContentView(R.layout.activity_send);
         mSelected = new ArrayList<String>();
         Intent intent = getIntent();
-        mRequestQueue = Volley.newRequestQueue(getApplicationContext());
         if (intent.hasExtra("url")) {
             url = intent.getStringExtra("url");
             Toast.makeText(getApplicationContext(), url, Toast.LENGTH_SHORT).show();
@@ -76,56 +74,25 @@ public class SendActivity extends Activity {
         button.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                StringRequest sr = new StringRequest(Request.Method.POST,
-                        "http://relay-links.appspot.com/relays", new Response.Listener<String>() {
+                getApi().sendRelay(url, mSelected, new RelayAPI.Callback<String>() {
                     @Override
-                    public void onResponse(String s) {
+                    public void run(String s) {
                         Toast.makeText(getBaseContext(), "Relay Sent!", Toast.LENGTH_SHORT).show();
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        // errors? what are those.
-                    }
-                }) {
-                    @Override
-                    protected Map<String, String> getParams() throws AuthFailureError {
-                        SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
-                        String username = prefs.getString("username", "Error");
-                        Map<String,String> params = new HashMap<String, String>();
-                        params.put("sender", username);
-                        params.put("url",url);
-                        params.put("recipients", TextUtils.join(",", mSelected));
-                        return params;
-
-                    }
-                };
-
-                mRequestQueue.add(sr);
+                });
                 Log.i("Jarvis", "Adding a relay for: " + url);
                 button.setClickable(false);
                 finish();
             }
         });
         lv.setBackgroundColor(Color.BLACK);
-        RequestQueue mRequestQueue = Volley.newRequestQueue(getApplicationContext());
-        mRequestQueue.add(
-                new GsonRequest<FriendList>("http://relay-links.appspot.com/users",
-                        FriendList.class, null, new Response.Listener<FriendList>() {
-                    @Override
-                    public void onResponse(FriendList friendList) {
-                        String[] values = friendList.getUsers().toArray(new String[0]);
-                        lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, values));
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        //Toast.makeText(getActivity(), "shit's fucked", Toast.LENGTH_SHORT).show();
-                        //Log.e("VolleyError", volleyError.toString());
-                    }
-                }
-                )
-        );
+        getApi().fetchFriends(new RelayAPI.Callback<FriendList>() {
+            @Override
+            public void run(FriendList friendList) {
+                String[] values = friendList.getUsers().toArray(new String[0]);
+                lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, values));
+            }
+        });
     }
 
 }

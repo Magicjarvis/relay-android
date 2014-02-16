@@ -9,6 +9,7 @@ import android.support.v7.app.ActionBar;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +17,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
 
-public class MainActivity extends ActionBarActivity
+import java.util.Map;
+
+public class MainActivity extends RelayActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
 
     /**
@@ -41,6 +44,7 @@ public class MainActivity extends ActionBarActivity
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
+        mNavigationDrawerFragment.setRetainInstance(true);
         mTitle = getTitle();
 
         // Set up the drawer.
@@ -50,17 +54,8 @@ public class MainActivity extends ActionBarActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO), "Received")
+                .replace(R.id.container, RelayListFragment.getInstance(1, mUsername))
                 .commit();
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        RelayListFragment f = (RelayListFragment) mNavigationDrawerFragment.getFragmentManager().findFragmentByTag("Received");
-        if (f != null) {
-            f.loadRelays();
-        }
     }
 
     @Override
@@ -74,14 +69,8 @@ public class MainActivity extends ActionBarActivity
             mUsername = prefs.getString("username", "");
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
-        if (position == 0) {
-            fragmentManager.beginTransaction()
-                    .replace(R.id.container, RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO), "Received")
-                    .commit();
-            return;
-        }
         fragmentManager.beginTransaction()
-                .replace(R.id.container, PlaceholderFragment.newInstance(position + 1))
+                .replace(R.id.container, RelayListFragment.getInstance(position + 1, mUsername))
                 .commit();
     }
 
@@ -138,50 +127,4 @@ public class MainActivity extends ActionBarActivity
         }
         return super.onOptionsItemSelected(item);
     }
-
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class PlaceholderFragment extends Fragment {
-        /**
-         * The fragment argument representing the section number for this
-         * fragment.
-         */
-        private static final String ARG_SECTION_NUMBER = "section_number";
-
-        /**
-         * Returns a new instance of this fragment for the given section
-         * number.
-         */
-        public static Fragment newInstance(int sectionNumber) {
-            if (sectionNumber == 1) {
-                return RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.TO);
-            } else if (sectionNumber == 2) {
-                return RelayListFragment.newInstance(mUsername, RelayListFragment.Direction.FROM);
-            }
-            PlaceholderFragment fragment = new PlaceholderFragment();
-            Bundle args = new Bundle();
-            args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-            fragment.setArguments(args);
-            return fragment;
-        }
-
-        public PlaceholderFragment() {
-        }
-
-        @Override
-        public View onCreateView(LayoutInflater inflater, ViewGroup container,
-                Bundle savedInstanceState) {
-            View rootView = inflater.inflate(R.layout.fragment_main, container, false);
-            return rootView;
-        }
-
-        @Override
-        public void onAttach(Activity activity) {
-            super.onAttach(activity);
-            ((MainActivity) activity).onSectionAttached(
-                    getArguments().getInt(ARG_SECTION_NUMBER));
-        }
-    }
-
 }

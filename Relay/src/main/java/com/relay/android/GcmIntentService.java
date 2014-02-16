@@ -34,7 +34,6 @@ public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
     public static final String TAG = "JARFISH";
     private NotificationManager mNotificationManager;
-    NotificationCompat.Builder builder;
 
     public GcmIntentService() {
         super("GcmIntentService");
@@ -66,8 +65,16 @@ public class GcmIntentService extends IntentService {
                     MESSAGE_TYPE_MESSAGE.equals(messageType)) {
                 // This loop represents the service doing some work.
                 // Post notification of received message.
-                sendNotification(extras.getString("sender"), extras.getString("title"));
+                RelayApplication app = (RelayApplication) getApplication();
+                RelayListFragment.evictCache();
+                if (app.isActivityVisible()) {
+                    app.refreshFeedIfVisible();
+                } else {
+                    sendNotification(extras.getString("sender"), extras.getString("title"));
+                }
+                // TODO: do this somewhere else
                 Log.i(TAG, "Received: " + extras.toString());
+
             }
         }
         // Release the wake lock provided by the WakefulBroadcastReceiver.

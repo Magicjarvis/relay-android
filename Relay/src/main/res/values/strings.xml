@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Relay</string>
-    <string name="title_section1">Received</string>
+    <string name="title_section1">Home</string>
     <string name="title_section2">Sent</string>
     <string name="title_section3">Saved</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>

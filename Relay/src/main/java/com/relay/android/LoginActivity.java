@@ -1,5 +1,6 @@
 package com.relay.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -36,7 +37,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-public class LoginActivity extends ActionBarActivity {
+public class LoginActivity extends RelayActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -56,7 +57,6 @@ public class LoginActivity extends ActionBarActivity {
 
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
-
         // Inflate the menu; this adds items to the action bar if it is present.
         getMenuInflater().inflate(R.menu.login, menu);
         return true;
@@ -74,19 +74,13 @@ public class LoginActivity extends ActionBarActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    /**
-     * A placeholder fragment containing a simple view.
-     */
-    public static class LoginFragment extends Fragment {
-        private RequestQueue mRequestQueue;
-
+    public static class LoginFragment extends RelayFragment {
         public LoginFragment() {
         }
 
         @Override
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
-            mRequestQueue = Volley.newRequestQueue(getActivity().getApplicationContext());
             View rootView = inflater.inflate(R.layout.fragment_login, container, false);
             final TextView username = (TextView) rootView.findViewById(R.id.username);
             final View button = (View) rootView.findViewById(R.id.login_button);
@@ -101,16 +95,15 @@ public class LoginActivity extends ActionBarActivity {
         }
 
         public void tryLogin(final String username) {
-            StringRequest sr = new StringRequest(Request.Method.POST,
-                    "http://relay-links.appspot.com/login", new Response.Listener<String>() {
+            getApi().attemptLogin(username, "password", new RelayAPI.Callback<String>() {
                 @Override
-                public void onResponse(String s) {
+                public void run(String s) {
                     boolean success = false;
                     try {
                         JSONObject obj = new JSONObject(s);
                         success = obj.getBoolean("success");
                     } catch(Exception e) {
-                       // wut?
+                        // wut?
                     }
                     if (success) {
                         Intent i = new Intent(getActivity().getApplicationContext(), MainActivity.class);
@@ -120,30 +113,8 @@ public class LoginActivity extends ActionBarActivity {
                     } else {
                         Toast.makeText(getActivity().getApplicationContext(), "WRONG", Toast.LENGTH_SHORT).show();
                     }
-
                 }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    // errors? what are those.
-                }
-            }) {
-                @Override
-                protected Map<String, String> getParams() throws AuthFailureError {
-                    Map<String,String> params = new HashMap<String, String>();
-                    SharedPreferences prefs = getActivity().getApplicationContext().getSharedPreferences(RootActivity.class.getSimpleName(), Context.MODE_PRIVATE);
-                    String regid = prefs.getString(RootActivity.PROPERTY_REG_ID, null);
-                    if (regid != null) {
-                        params.put("gcm_id", regid);
-                    }
-                    params.put("username", username);
-                    params.put("password","password");
-                    return params;
-
-                }
-            };
-
-            mRequestQueue.add(sr);
+            });
         }
     }
 

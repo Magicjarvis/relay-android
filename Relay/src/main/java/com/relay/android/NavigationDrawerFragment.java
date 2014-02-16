@@ -209,6 +209,12 @@ public class NavigationDrawerFragment extends Fragment {
     }
 
     @Override
+    public void onLowMemory() {
+        super.onLowMemory();
+        Log.i("JARVIS", "onLowMemory()");
+    }
+
+    @Override
     public void onDetach() {
         super.onDetach();
         mCallbacks = null;
@@ -245,10 +251,7 @@ public class NavigationDrawerFragment extends Fragment {
         }
 
         if (item.getItemId() == R.id.action_refresh) {
-            RelayListFragment f = (RelayListFragment) getFragmentManager().findFragmentByTag("Received");
-            if (f != null) {
-                f.loadRelays();
-            }
+            ((RelayApplication)getActivity().getApplication()).refreshFeedIfVisible();
             return true;
         }
 

@@ -57,23 +57,10 @@ public class RelayAdapter extends BaseAdapter {
     }
 
     public void handleRefresh(RelayList rList) {
-        /*List<Relay> list = rList.getRelays();
-        int cur = 0;
-        for (Relay newRelay : list) {
-            if (cur >= mRelays.size()) {
-                continue;
-            }
-            else if (!newRelay.equals(list.get(cur))) {
-                list.add(cur, newRelay);
-            }
-            cur++;
-
-
-        }*/
-        mRelays = rList.getRelays();
-        notifyDataSetChanged();
-
-
+        if (!mRelays.equals(rList.getRelays())) {
+            mRelays = rList.getRelays();
+            notifyDataSetChanged();
+        }
     }
 
     @Override
