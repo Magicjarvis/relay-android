@@ -10,6 +10,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
+import android.widget.Adapter;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
 import android.widget.ListAdapter;
@@ -17,6 +18,7 @@ import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -36,7 +38,6 @@ public class RelayFeedFragment extends RelayListFragment {
     }
     private String username;
     private Direction direction;
-    private int mOffset;
     private boolean atEndOfList;
     private View mFooterView;
 
@@ -51,7 +52,6 @@ public class RelayFeedFragment extends RelayListFragment {
         // use bundle args TODO
         f.setDirection(d);
         f.setUsername(username);
-        f.setOffset(0);
         f.setAtEndOfList(false);
         return f;
     }
@@ -70,9 +70,6 @@ public class RelayFeedFragment extends RelayListFragment {
 
     public void setAtEndOfList(boolean atEndOfList) {
         this.atEndOfList = atEndOfList;
-    }
-    public void setOffset(int mOffset) {
-        this.mOffset = mOffset;
     }
 
     public void setDirection(Direction direction) {
@@ -108,10 +105,16 @@ public class RelayFeedFragment extends RelayListFragment {
             @Override
             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                 final RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listView.getAdapter()).getWrappedAdapter();
+                Log.i(TAG, "WHAT THE FUCK IS THIS: " + Arrays.toString(reverseSortedPositions));
                 for (int position : reverseSortedPositions) {
-                    adapter.removeItem(position);
+                    deleteRelay(listView.getAdapter(), position);
                 }
                 adapter.notifyDataSetChanged();
+                if (atEndOfList) return;
+                if (mFooterView != null && mFooterView.isShown()) {
+                    loadRelays(adapter.getCount());
+                }
+
             }
 
             @Override
@@ -128,7 +131,7 @@ public class RelayFeedFragment extends RelayListFragment {
                 touchScrollListener.onScrollStateChanged(absListView, scrollState);
                 if (atEndOfList) return;
                 if (mFooterView != null && mFooterView.isShown()) {
-                    loadRelays(mOffset);
+                    loadRelays(getListAdapter().getCount());
                 }
 
             }
@@ -142,15 +145,7 @@ public class RelayFeedFragment extends RelayListFragment {
         listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                final Relay r = (Relay) adapterView.getAdapter().getItem(i);
-                RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)adapterView.getAdapter()).getWrappedAdapter();
-                adapter.removeItem(i);
-                getApi().deleteRelay(username, r.getId(), new RelayAPI.Callback<String>() {
-                    @Override
-                    public void run(String s) {
-                        Toast.makeText(getActivity().getApplicationContext(), "Relay Deleted", Toast.LENGTH_SHORT).show();
-                    }
-                });
+                deleteRelay(adapterView.getAdapter(), i);
                 return true;
             }
         });
@@ -167,6 +162,18 @@ public class RelayFeedFragment extends RelayListFragment {
         }
 
         return root;
+    }
+
+    private void deleteRelay(Adapter listAdapter, int i) {
+        final Relay r = (Relay) listAdapter.getItem(i);
+        RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listAdapter).getWrappedAdapter();
+        adapter.removeItem(i);
+        getApi().deleteRelay(username, r.getId(), new RelayAPI.Callback<String>() {
+            @Override
+            public void run(String s) {
+                Toast.makeText(getActivity().getApplicationContext(), "Relay Deleted", Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 
     @Override
@@ -241,7 +248,6 @@ public class RelayFeedFragment extends RelayListFragment {
                     } else {
                         adapter.appendRelays(relayList);
                     }
-                    mOffset = adapter.getCount();
                 } else {
                     Log.i("jarvis", "we dont have adapter");
                     if (getActivity() != null) {
@@ -249,7 +255,6 @@ public class RelayFeedFragment extends RelayListFragment {
                         RelayAdapter adapter = new RelayAdapter(getActivity().getApplicationContext(), relayList.getRelays());
                         relayAdapterCache.put(direction, adapter);
                         setListAdapter(adapter);
-                        mOffset = adapter.getCount();
                     } else {
                         Log.i(TAG, "using the list cache");
                         relayListCache.put(direction, relayList);

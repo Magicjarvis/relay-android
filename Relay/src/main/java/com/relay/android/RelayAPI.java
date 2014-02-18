@@ -233,7 +233,7 @@ public class RelayAPI {
         }
         final String url = thing + (from ? "" : "?offset=" + offset);
 
-        Log.i("jarvis", "sending off the request");
+        Log.i("jarvis", "sending off the request: " + url);
 
         final Request request = new GsonRequest<RelayList>(url, RelayList.class, null, new Response.Listener<RelayList>() {
             @Override
