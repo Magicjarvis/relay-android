@@ -1,6 +1,7 @@
 package com.relay.android;
 
 import android.app.Application;
+import android.util.Log;
 
 public class RelayApplication extends Application {
     private RelayAPI api;
@@ -16,7 +17,7 @@ public class RelayApplication extends Application {
     }
     private static boolean activityVisible = true;
     private static boolean feedVisible = false;
-    private static RelayListFragment feed = null;
+    private static RelayFeedFragment feed = null;
 
     public static boolean isActivityVisible() {
         return activityVisible;
@@ -30,8 +31,16 @@ public class RelayApplication extends Application {
         activityVisible = false;
     }
 
-    public static void refreshFeedIfVisible() {
+    public static void hardRefreshFeed() {
         if (feedVisible && feed != null) {
+            feed.loadRelays(0);
+        }
+    }
+    public static void refreshFeedIfVisible() {
+        Log.i("Jarvis", "Feed visible is: " + feedVisible);
+        Log.i("Jarvis", "Feed is null status: " + (feed == null));
+        if (feedVisible && feed != null) {
+            Log.i("jarvis", "calling lazyRefresh()");
             feed.lazyRefresh();
         }
     }
@@ -43,7 +52,7 @@ public class RelayApplication extends Application {
         feedVisible = true;
     }
 
-    public static void setFeed(RelayListFragment feedHandle) {
+    public static void setFeed(RelayFeedFragment feedHandle) {
         feed = feedHandle;
     }
 

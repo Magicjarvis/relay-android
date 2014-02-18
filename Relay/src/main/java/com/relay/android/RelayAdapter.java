@@ -9,6 +9,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.HeaderViewListAdapter;
 import android.widget.TextView;
 
 import com.android.volley.RequestQueue;
@@ -18,6 +19,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.List;
 
 /**
@@ -32,7 +34,7 @@ public class RelayAdapter extends BaseAdapter {
 
     public RelayAdapter(Context context, List<Relay> relays) {
         mContext = context;
-        mRelays = relays == null ? new ArrayList<Relay>() : relays;
+        mRelays = relays == null ? new LinkedList<Relay>() : relays;
         mRequestQueue = Volley.newRequestQueue(context);
         int memClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
                 .getMemoryClass();
@@ -56,8 +58,14 @@ public class RelayAdapter extends BaseAdapter {
         notifyDataSetChanged();
     }
 
+    public void appendRelays(RelayList rList) {
+        mRelays.addAll(rList.getRelays());
+        notifyDataSetChanged();
+    }
+
     public void handleRefresh(RelayList rList) {
         if (!mRelays.equals(rList.getRelays())) {
+            Log.i("JARVIS", "THIS IS THE NEW LIST: "+rList.getRelays());
             mRelays = rList.getRelays();
             notifyDataSetChanged();
         }

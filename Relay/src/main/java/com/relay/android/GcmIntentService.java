@@ -1,34 +1,16 @@
 package com.relay.android;
 
-import android.app.Activity;
 import android.app.IntentService;
 import android.app.Notification;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.os.AsyncTask;
 import android.os.Bundle;
-import android.os.SystemClock;
 import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.android.gms.gcm.GoogleCloudMessaging;
-
-import org.apache.http.HttpResponse;
-import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.StatusLine;
-import org.apache.http.client.HttpClient;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
-import org.apache.http.message.BasicNameValuePair;
-
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 public class GcmIntentService extends IntentService {
     public static final int NOTIFICATION_ID = 1;
@@ -66,8 +48,10 @@ public class GcmIntentService extends IntentService {
                 // This loop represents the service doing some work.
                 // Post notification of received message.
                 RelayApplication app = (RelayApplication) getApplication();
-                RelayListFragment.evictCache();
+                RelayFeedFragment.evictCache();
+                Log.i("jarvis", "cacheEvicted");
                 if (app.isActivityVisible()) {
+                    Log.i("Jarvis", "calling refreshfeed if visible");
                     app.refreshFeedIfVisible();
                 } else {
                     sendNotification(extras.getString("sender"), extras.getString("title"));

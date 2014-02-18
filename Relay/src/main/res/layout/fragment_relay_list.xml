@@ -2,12 +2,20 @@
 
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
-    android:layout_height="match_parent">
+    android:layout_height="match_parent" android:id="@+id/relay_feed">
+    <ProgressBar
+        android:id="@android:id/empty"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_weight="2">
+    </ProgressBar>
 
     <ListView
+        android:scrollbars="none"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:id="@+id/relay_list"
+        android:id="@android:id/list"
         android:background="@color/lighter_gray"
         android:layout_width="match_parent"
         android:layout_height="match_parent">

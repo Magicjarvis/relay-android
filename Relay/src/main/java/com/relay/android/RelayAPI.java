@@ -6,6 +6,7 @@ import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Window;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
 import android.widget.Toast;
@@ -40,6 +41,7 @@ public class RelayAPI {
     private static final String RELAYS_FROM_ENDPOINT = API_URL + "/relays/from/";
     private static final String FRIENDS_ENDPOINT = API_URL + "/users";
     private static final String LOGIN_ENDPOINT = API_URL + "/login";
+    private static final String UNREGISTER_ENDPOINT = API_URL + "/unregister";
 
     private RequestQueue mRequestQueue;
     private Set<String> mInFlightRequests;
@@ -144,6 +146,42 @@ public class RelayAPI {
 
     }
 
+    public void unRegisterGCM(final String username, final Callback<String> callback) {
+        if (mInFlightRequests.contains(UNREGISTER_ENDPOINT)) {
+            return;
+        }
+        StringRequest sr = new StringRequest(Request.Method.POST,
+                UNREGISTER_ENDPOINT, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String s) {
+                mInFlightRequests.remove(UNREGISTER_ENDPOINT);
+                callback.run(s);
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                mInFlightRequests.remove(UNREGISTER_ENDPOINT);
+                // errors? what are those.
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                Map<String,String> params = new HashMap<String, String>();
+                SharedPreferences prefs = mContext.getSharedPreferences(RootActivity.class.getSimpleName(), Context.MODE_PRIVATE);
+                String regid = prefs.getString(RootActivity.PROPERTY_REG_ID, null);
+                if (regid != null) {
+                    params.put("gcm_id", regid);
+                }
+                params.put("username", username);
+                return params;
+
+            }
+        };
+
+        mRequestQueue.add(sr);
+        mInFlightRequests.add(UNREGISTER_ENDPOINT);
+
+    }
     public void attemptLogin(final String username, final String password, final Callback<String> callback) {
         if (mInFlightRequests.contains(LOGIN_ENDPOINT)) {
             return;
@@ -182,30 +220,39 @@ public class RelayAPI {
 
     }
 
-    public void fetchRelays(String username, boolean from, final Callback<RelayList> callback) {
-        final String url = (from ? RELAYS_FROM_ENDPOINT : RELAYS_TO_ENDPOINT) + username;
+    public void fetchRelays(String username, boolean from, int offset, final Callback<RelayList> callback) {
+        String thing = RELAYS_TO_ENDPOINT + username;
+        if (from) {
+            thing = RELAYS_FROM_ENDPOINT + username;
+        }
 
-        if (mInFlightRequests.contains(url)) {
+        final String final_thing = thing;
+        if (mInFlightRequests.contains(final_thing)) {
+            Log.i("jarvis", "in flight: " + final_thing);
             return;
         }
+        final String url = thing + (from ? "" : "?offset=" + offset);
+
+        Log.i("jarvis", "sending off the request");
 
         final Request request = new GsonRequest<RelayList>(url, RelayList.class, null, new Response.Listener<RelayList>() {
             @Override
             public void onResponse(RelayList relayList) {
-                mInFlightRequests.remove(url);
+                mInFlightRequests.remove(final_thing);
+                Log.i("jarvis", "removed "+final_thing);
+                //Log.i("jarvis", mInFlightRequests.toString());
+                //Log.i("jarvis", "calling callback");
                 callback.run(relayList);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(url);
+                mInFlightRequests.remove(final_thing);
                 Log.i("JARVIS", "There was an error");
-                //Toast.makeText(getActivity(), "shit's fucked", Toast.LENGTH_SHORT).show();
-                //Log.e("VolleyError", volleyError.toString());
             }
         });
         mRequestQueue.add(request);
-        mInFlightRequests.add(url);
+        mInFlightRequests.add(final_thing);
     }
 
     public static class Callback<T> {

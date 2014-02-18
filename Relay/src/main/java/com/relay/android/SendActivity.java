@@ -81,6 +81,7 @@ public class SendActivity extends RelayActivity {
                     }
                 });
                 Log.i("Jarvis", "Adding a relay for: " + url);
+                Log.i("Jarvis", "Adding a relay to: " + mSelected.toString());
                 button.setClickable(false);
                 finish();
             }

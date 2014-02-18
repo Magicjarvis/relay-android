@@ -1,23 +1,15 @@
 package com.relay.android;
 
-import android.app.Activity;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
-import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBar;
-import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentManager;
 import android.os.Bundle;
-import android.util.Log;
-import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.view.View;
-import android.view.ViewGroup;
 import android.support.v4.widget.DrawerLayout;
-
-import java.util.Map;
+import android.view.Window;
 
 public class MainActivity extends RelayActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -36,6 +28,7 @@ public class MainActivity extends RelayActivity
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        requestWindowFeature(Window.FEATURE_INDETERMINATE_PROGRESS);
         setContentView(R.layout.activity_main);
 
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
@@ -54,7 +47,7 @@ public class MainActivity extends RelayActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, RelayListFragment.getInstance(1, mUsername))
+                .replace(R.id.container, RelayFeedFragment.getInstance(1, mUsername))
                 .commit();
     }
 
@@ -70,7 +63,7 @@ public class MainActivity extends RelayActivity
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, RelayListFragment.getInstance(position + 1, mUsername))
+                .replace(R.id.container, RelayFeedFragment.getInstance(position + 1, mUsername))
                 .commit();
     }
 
@@ -120,6 +113,13 @@ public class MainActivity extends RelayActivity
             return true;
         } else if (id == R.id.action_logout) {
             SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
+            String username = sp.getString("username", null);
+            getApi().unRegisterGCM(username, new RelayAPI.Callback<String>() {
+                @Override
+                public void run(String response) {
+                    super.run(response);
+                }
+            });
             sp.edit().remove("username").commit();
             startActivity(new Intent(this, LoginActivity.class));
             finish();

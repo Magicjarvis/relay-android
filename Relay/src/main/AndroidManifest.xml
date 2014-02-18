@@ -11,10 +11,12 @@
     <uses-permission android:name="android.permission.INTERNET" />
     <uses-permission android:name="com.google.android.c2dm.permission.RECEIVE" />
     <uses-permission android:name="android.permission.GET_ACCOUNTS" />
-    <uses-permission android:name="android.permission.WAKE_LOCK"/>
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
 
-    <permission android:name="com.relay.android.permission.C2D_MESSAGE"
+    <permission
+        android:name="com.relay.android.permission.C2D_MESSAGE"
         android:protectionLevel="signature" />
+
     <uses-permission android:name="com.relay.android.permission.C2D_MESSAGE" />
 
     <application
@@ -24,31 +26,32 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
 
-        <!-- <meta-data android:name="com.google.android.gms.version"
-            android:value="@integer/google_play_services_version" /> -->
+        <!--
+             <meta-data android:name="com.google.android.gms.version"
+            android:value="@integer/google_play_services_version" />
+        -->
 
         <receiver
-            android:name=".GcmBroadcastReceiver"
+            android:name="com.relay.android.GcmBroadcastReceiver"
             android:permission="com.google.android.c2dm.permission.SEND" >
             <intent-filter>
                 <action android:name="com.google.android.c2dm.intent.RECEIVE" />
+
                 <category android:name="com.relay.android" />
             </intent-filter>
         </receiver>
-        <service android:name=".GcmIntentService" />
 
+        <service android:name="com.relay.android.GcmIntentService" />
 
         <activity android:name="com.relay.android.SendActivity" />
-        <activity
-            android:name="com.relay.android.MainActivity" >
+        <activity android:name="com.relay.android.MainActivity" >
         </activity>
-        <activity
-            android:name="com.relay.android.LoginActivity">
+        <activity android:name="com.relay.android.LoginActivity" >
         </activity>
         <activity
             android:name="com.relay.android.RootActivity"
-            android:label="@string/app_name"
-            android:finishOnTaskLaunch="true">
+            android:finishOnTaskLaunch="true"
+            android:label="@string/app_name" >
             <intent-filter>
                 <action android:name="android.intent.action.SEND" />
 
@@ -61,6 +64,10 @@
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
+        </activity>
+        <activity
+            android:name="com.relay.android.LandingActivity"
+            android:label="@string/title_activity_landing" >
         </activity>
     </application>
 

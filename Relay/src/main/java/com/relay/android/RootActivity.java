@@ -1,5 +1,6 @@
 package com.relay.android;
 
+import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -11,6 +12,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.text.TextUtils;
 import android.util.Log;
+import android.view.Window;
 import android.widget.Toast;
 
 
@@ -103,7 +105,7 @@ public class RootActivity extends ActionBarActivity {
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
 
         if (!prefs.contains("username")) {
-            startActivity(new Intent(this, LoginActivity.class));
+            startActivity(new Intent(this, LandingActivity.class));
             finish();
             return;
         }
