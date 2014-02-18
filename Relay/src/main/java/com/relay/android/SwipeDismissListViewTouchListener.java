@@ -398,6 +398,29 @@ public class SwipeDismissListViewTouchListener implements View.OnTouchListener {
             }
         });
 
+        animator.addListener(new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animator) {
+                lp.height = 0;
+                dismissView.setLayoutParams(lp);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animator) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animator) {
+
+            }
+        });
+
         mPendingDismisses.add(new PendingDismissData(dismissPosition, dismissView));
         animator.start();
     }

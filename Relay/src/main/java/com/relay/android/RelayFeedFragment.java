@@ -104,8 +104,7 @@ public class RelayFeedFragment extends RelayListFragment {
         ListView listView = (ListView) root.findViewById(android.R.id.list);
         listView.addFooterView(mFooterView);
 
-        // TODO(coolbrow): uncomment
-        /*SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+        SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
             @Override
             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
                 final RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listView.getAdapter()).getWrappedAdapter();
@@ -119,16 +118,14 @@ public class RelayFeedFragment extends RelayListFragment {
             public boolean canDismiss(int position) {
                 return true;
             }
-        });*/
-        // TODO(coolbrow): uncomment
-        //listView.setOnTouchListener(touchListener);
-        // TODO(coolbrow): uncomment
-        //final AbsListView.OnScrollListener touchScrollListener = touchListener.makeScrollListener();
+        });
+        listView.setOnTouchListener(touchListener);
+        final AbsListView.OnScrollListener touchScrollListener = touchListener.makeScrollListener();
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                // TODO(coolbrow): uncomment
-                //touchScrollListener.onScrollStateChanged(absListView, scrollState);
+
+                touchScrollListener.onScrollStateChanged(absListView, scrollState);
                 if (atEndOfList) return;
                 if (mFooterView != null && mFooterView.isShown()) {
                     loadRelays(mOffset);
@@ -138,8 +135,7 @@ public class RelayFeedFragment extends RelayListFragment {
 
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                // TODO(coolbrow): uncomment
-                //touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
+                touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
             }
         });
 
