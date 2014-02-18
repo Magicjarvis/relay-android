@@ -211,6 +211,10 @@ public class RelayFeedFragment extends RelayListFragment {
                     @Override
                     public void onRefreshStarted(View view) {
                         loadRelays(0);
+                        atEndOfList = false;
+                        // Remove the view to prevent multiple footerviews
+                        getListView().removeFooterView(mFooterView);
+                        getListView().addFooterView(mFooterView);
                     }
 
 
@@ -262,7 +266,7 @@ public class RelayFeedFragment extends RelayListFragment {
                 }
                 Log.i("JARVIS", relayList.toString());
                 if (relayList.getRelays().size() == 0) {
-                    mFooterView.setVisibility(View.GONE);
+                    getListView().removeFooterView(mFooterView);
                     atEndOfList = true;
                     return;
                 }
