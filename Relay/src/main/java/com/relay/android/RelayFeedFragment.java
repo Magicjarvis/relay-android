@@ -12,6 +12,7 @@ import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.AdapterView;
 import android.widget.HeaderViewListAdapter;
+import android.widget.ListAdapter;
 import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.Toast;
@@ -103,10 +104,31 @@ public class RelayFeedFragment extends RelayListFragment {
         ListView listView = (ListView) root.findViewById(android.R.id.list);
         listView.addFooterView(mFooterView);
 
+        // TODO(coolbrow): uncomment
+        /*SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
+            @Override
+            public void onDismiss(ListView listView, int[] reverseSortedPositions) {
+                final RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listView.getAdapter()).getWrappedAdapter();
+                for (int position : reverseSortedPositions) {
+                    adapter.removeItem(position);
+                }
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public boolean canDismiss(int position) {
+                return true;
+            }
+        });*/
+        // TODO(coolbrow): uncomment
+        //listView.setOnTouchListener(touchListener);
+        // TODO(coolbrow): uncomment
+        //final AbsListView.OnScrollListener touchScrollListener = touchListener.makeScrollListener();
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                Log.i("JARVIS", "onScrollStateChanged also mOffset is: "+mOffset);
+                // TODO(coolbrow): uncomment
+                //touchScrollListener.onScrollStateChanged(absListView, scrollState);
                 if (atEndOfList) return;
                 if (mFooterView != null && mFooterView.isShown()) {
                     loadRelays(mOffset);
@@ -116,6 +138,8 @@ public class RelayFeedFragment extends RelayListFragment {
 
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                // TODO(coolbrow): uncomment
+                //touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
             }
         });
 
@@ -123,7 +147,7 @@ public class RelayFeedFragment extends RelayListFragment {
             @Override
             public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
                 final Relay r = (Relay) adapterView.getAdapter().getItem(i);
-                RelayAdapter adapter = (RelayAdapter) adapterView.getAdapter();
+                RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)adapterView.getAdapter()).getWrappedAdapter();
                 adapter.removeItem(i);
                 getApi().deleteRelay(username, r.getId(), new RelayAPI.Callback<String>() {
                     @Override
