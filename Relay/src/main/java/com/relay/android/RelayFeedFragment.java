@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.ListFragment;
+import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -24,12 +25,19 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh;
+import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout;
+import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
+
 public class RelayFeedFragment extends RelayListFragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
 
     private static Map<Direction, RelayAdapter> relayAdapterCache = new HashMap<Direction, RelayAdapter>();
     private static Map<Direction, RelayList> relayListCache = new HashMap<Direction, RelayList>();
     private static Set<Direction> staleDirections = new HashSet<Direction>();
+
+    private PullToRefreshLayout mPullToRefreshLayout;
+
 
     private static final String TAG = "JARVIS";
     public enum Direction {
@@ -164,6 +172,7 @@ public class RelayFeedFragment extends RelayListFragment {
         return root;
     }
 
+
     private void deleteRelay(Adapter listAdapter, int i) {
         final Relay r = (Relay) listAdapter.getItem(i);
         RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listAdapter).getWrappedAdapter();
@@ -192,6 +201,22 @@ public class RelayFeedFragment extends RelayListFragment {
     public void onViewCreated(View view, Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         ((RelayApplication) getActivity().getApplication()).setFeed(this);
+        ViewGroup viewGroup = (ViewGroup) view;
+
+        // We need to create a PullToRefreshLayout manually
+        mPullToRefreshLayout = new PullToRefreshLayout(viewGroup.getContext());
+        ActionBarPullToRefresh.from(getActivity()).insertLayoutInto(viewGroup)
+                .theseChildrenArePullable(getListView(), getListView().getEmptyView())
+                .listener(new OnRefreshListener() {
+                    @Override
+                    public void onRefreshStarted(View view) {
+                        loadRelays(0);
+                    }
+
+
+
+                }
+                ).setup(mPullToRefreshLayout);
     }
 
     @Override
@@ -229,6 +254,7 @@ public class RelayFeedFragment extends RelayListFragment {
         getApi().fetchRelays(username, direction == Direction.FROM, offset, new RelayAPI.Callback<RelayList>() {
             @Override
             public void run(RelayList relayList) {
+                mPullToRefreshLayout.setRefreshComplete();
                 if (getActivity() != null) {
                 }
                 if (relayList == null) {

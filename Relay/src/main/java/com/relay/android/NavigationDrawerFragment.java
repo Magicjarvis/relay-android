@@ -250,12 +250,6 @@ public class NavigationDrawerFragment extends Fragment {
             return true;
         }
 
-        if (item.getItemId() == R.id.action_refresh) {
-            Toast.makeText(getActivity(), "Refreshing...", Toast.LENGTH_SHORT).show();
-            ((RelayApplication)getActivity().getApplication()).hardRefreshFeed();
-            return true;
-        }
-
         return super.onOptionsItemSelected(item);
     }
 
