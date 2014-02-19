@@ -14,5 +14,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_root">Relay</string>
     <string name="title_activity_landing">LandingActivity</string>
+    <string name="no_relays">No Relays</string>
 
 </resources>

@@ -48,6 +48,8 @@ public class RelayFeedFragment extends RelayListFragment {
     private Direction direction;
     private boolean atEndOfList;
     private View mFooterView;
+    private View mEmptyView;
+    private View mLoadingView;
 
 
     public RelayFeedFragment(){
@@ -106,13 +108,15 @@ public class RelayFeedFragment extends RelayListFragment {
         super.onCreateView(inflater, container, savedInstanceState);
         View root = inflater.inflate(R.layout.fragment_relay_list, container, false);
         mFooterView = inflater.inflate(R.layout.progress_bar, null, false);
+        mEmptyView = root.findViewById(R.id.empty_view);
+        mLoadingView = root.findViewById(R.id.loading_view);
         ListView listView = (ListView) root.findViewById(android.R.id.list);
-        listView.addFooterView(mFooterView);
+        listView.addFooterView(mFooterView, null, false);
 
         SwipeDismissListViewTouchListener touchListener = new SwipeDismissListViewTouchListener(listView, new SwipeDismissListViewTouchListener.DismissCallbacks() {
             @Override
             public void onDismiss(ListView listView, int[] reverseSortedPositions) {
-                final RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listView.getAdapter()).getWrappedAdapter();
+                final RelayAdapter adapter = (RelayAdapter) getListAdapter();
                 Log.i(TAG, "WHAT THE FUCK IS THIS: " + Arrays.toString(reverseSortedPositions));
                 for (int position : reverseSortedPositions) {
                     deleteRelay(listView.getAdapter(), position);
@@ -135,18 +139,16 @@ public class RelayFeedFragment extends RelayListFragment {
         listView.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-
                 touchScrollListener.onScrollStateChanged(absListView, scrollState);
-                if (atEndOfList) return;
-                if (mFooterView != null && mFooterView.isShown()) {
-                    loadRelays(getListAdapter().getCount());
-                }
-
             }
 
             @Override
             public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
                 touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
+                if (atEndOfList) return;
+                if (mFooterView != null && mFooterView.isShown()) {
+                    loadRelays(getListAdapter().getCount());
+                }
             }
         });
 
@@ -159,7 +161,7 @@ public class RelayFeedFragment extends RelayListFragment {
         });
         if (relayAdapterCache.containsKey(direction)) {
             Log.i(TAG, "Using relayAdapterCache instead of making request");
-            listView.setAdapter(relayAdapterCache.get(direction));
+            setListAdapter(relayAdapterCache.get(direction));
             if (staleDirections.contains(direction)) {
                 loadRelays(0);
                 staleDirections.remove(direction);
@@ -175,7 +177,7 @@ public class RelayFeedFragment extends RelayListFragment {
 
     private void deleteRelay(Adapter listAdapter, int i) {
         final Relay r = (Relay) listAdapter.getItem(i);
-        RelayAdapter adapter = (RelayAdapter) ((HeaderViewListAdapter)listAdapter).getWrappedAdapter();
+        RelayAdapter adapter = (RelayAdapter) getListAdapter();
         adapter.removeItem(i);
         getApi().deleteRelay(username, r.getId(), new RelayAPI.Callback<String>() {
             @Override
@@ -211,14 +213,7 @@ public class RelayFeedFragment extends RelayListFragment {
                     @Override
                     public void onRefreshStarted(View view) {
                         loadRelays(0);
-                        atEndOfList = false;
-                        // Remove the view to prevent multiple footerviews
-                        getListView().removeFooterView(mFooterView);
-                        getListView().addFooterView(mFooterView);
                     }
-
-
-
                 }
                 ).setup(mPullToRefreshLayout);
     }
@@ -267,8 +262,17 @@ public class RelayFeedFragment extends RelayListFragment {
                 Log.i("JARVIS", relayList.toString());
                 if (relayList.getRelays().size() == 0) {
                     getListView().removeFooterView(mFooterView);
+                    mLoadingView.setVisibility(View.GONE);
+                    mEmptyView.setVisibility(View.VISIBLE);
                     atEndOfList = true;
                     return;
+                } else {
+                    if (getListView().getFooterViewsCount() == 0) {
+                        getListView().addFooterView(mFooterView, null, false);
+                    }
+                    mLoadingView.setVisibility(View.VISIBLE);
+                    mEmptyView.setVisibility(View.GONE);
+                    atEndOfList = false;
                 }
                 if (getListAdapter() != null) {
                     Log.i("jarvis", "we have adapter");

@@ -3,14 +3,25 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent" android:id="@+id/relay_feed">
-    <ProgressBar
+    <FrameLayout
         android:id="@android:id/empty"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_weight="2">
-    </ProgressBar>
-
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <ProgressBar
+            android:id="@+id/loading_view"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center">
+        </ProgressBar>
+        <TextView
+            android:id="@+id/empty_view"
+            android:visibility="gone"
+            android:text="@string/no_relays"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:layout_gravity="center"/>
+    </FrameLayout>
     <ListView
         android:scrollbars="none"
         android:divider="@null"
