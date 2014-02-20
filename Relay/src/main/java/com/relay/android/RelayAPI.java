@@ -1,28 +1,21 @@
 package com.relay.android;
 
 import android.content.Context;
-import android.content.Intent;
 import android.content.SharedPreferences;
 import android.preference.PreferenceManager;
 import android.text.TextUtils;
 import android.util.Log;
-import android.view.Window;
-import android.widget.ArrayAdapter;
-import android.widget.ListView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Cache;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
-import com.google.android.gms.internal.co;
 
-import org.json.JSONObject;
 
+import com.relay.android.RelayFeedFragment.FeedType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -39,9 +32,17 @@ public class RelayAPI {
     private static final String DELETE_RELAY_ENDPOINT = RELAYS_ENDPOINT + "/delete";
     private static final String RELAYS_TO_ENDPOINT = API_URL + "/relays/to/";
     private static final String RELAYS_FROM_ENDPOINT = API_URL + "/relays/from/";
+    private static final String RELAYS_SAVED_ENDPOINT = API_URL + "/relays/saved/";
     private static final String FRIENDS_ENDPOINT = API_URL + "/users";
     private static final String LOGIN_ENDPOINT = API_URL + "/login";
     private static final String UNREGISTER_ENDPOINT = API_URL + "/unregister";
+
+    private static final Map<FeedType, String> FEED_TYPE_URL_MAP = new HashMap<FeedType, String>() {{
+        put(FeedType.FROM, RELAYS_FROM_ENDPOINT);
+        put(FeedType.TO, RELAYS_TO_ENDPOINT);
+        put(FeedType.SAVED, RELAYS_SAVED_ENDPOINT);
+
+    }};
 
     private RequestQueue mRequestQueue;
     private Set<String> mInFlightRequests;
@@ -220,45 +221,34 @@ public class RelayAPI {
 
     }
 
-    public void fetchRelays(String username, boolean from, int offset, final Callback<RelayList> callback) {
-        String thing = RELAYS_TO_ENDPOINT + username;
-        if (from) {
-            thing = RELAYS_FROM_ENDPOINT + username;
-        }
-
-        final String final_thing = thing;
-        if (mInFlightRequests.contains(final_thing)) {
-            Log.i("jarvis", "in flight: " + final_thing);
+    public void fetchRelays(String username, FeedType feedtype, int offset, final Callback<RelayList> callback) {
+        final String baseUrl = FEED_TYPE_URL_MAP.get(feedtype) + username;
+        if (mInFlightRequests.contains(baseUrl)) {
+            Log.i("jarvis", "in flight: " + baseUrl);
             return;
         }
-        final String url = thing + (from ? "" : "?offset=" + offset);
-
+        final String url = baseUrl + "?offset=" + offset;
         Log.i("jarvis", "sending off the request: " + url);
-
         final Request request = new GsonRequest<RelayList>(url, RelayList.class, null, new Response.Listener<RelayList>() {
             @Override
             public void onResponse(RelayList relayList) {
-                mInFlightRequests.remove(final_thing);
-                Log.i("jarvis", "removed "+final_thing);
-                //Log.i("jarvis", mInFlightRequests.toString());
-                //Log.i("jarvis", "calling callback");
+                mInFlightRequests.remove(baseUrl);
+                Log.i("jarvis", "removed "+baseUrl);
                 callback.run(relayList);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(final_thing);
+                mInFlightRequests.remove(baseUrl);
                 Log.i("JARVIS", "There was an error");
             }
         });
         mRequestQueue.add(request);
-        mInFlightRequests.add(final_thing);
+        mInFlightRequests.add(baseUrl);
     }
 
-    public static class Callback<T> {
-        public void run(T response) {
-
-        }
+    public static interface Callback<T> {
+        public void run(T response);
     }
 
 

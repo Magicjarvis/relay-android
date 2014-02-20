@@ -10,6 +10,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.support.v4.widget.DrawerLayout;
 import android.view.Window;
+import android.widget.Toast;
 
 public class MainActivity extends RelayActivity
         implements NavigationDrawerFragment.NavigationDrawerCallbacks {
@@ -117,7 +118,7 @@ public class MainActivity extends RelayActivity
             getApi().unRegisterGCM(username, new RelayAPI.Callback<String>() {
                 @Override
                 public void run(String response) {
-                    super.run(response);
+                    Toast.makeText(getApplicationContext(), "Logged out!", Toast.LENGTH_SHORT);
                 }
             });
             sp.edit().remove("username").commit();

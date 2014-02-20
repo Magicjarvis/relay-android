@@ -3,6 +3,7 @@ package com.relay.android;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.Intent;
+import android.content.res.ColorStateList;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
@@ -93,13 +94,16 @@ public class RelayAdapter extends BaseAdapter {
         TextView people = (TextView) v.findViewById(R.id.relay_people);
         NetworkImageView mImageView = (NetworkImageView) v.findViewById(R.id.relay_image);
 
-        Button saveButton = (Button) v.findViewById(R.id.save_button);
-        Button relayButton = (Button) v.findViewById(R.id.relay_button);
+        final Button saveButton = (Button) v.findViewById(R.id.save_button);
+        final Button relayButton = (Button) v.findViewById(R.id.relay_button);
 
         saveButton.setOnClickListener(new View.OnClickListener() {
 
             @Override
             public void onClick(View v) {
+                saveButton.setText("Saved");
+                saveButton.setTextColor(ColorStateList.valueOf(R.color.light_gray));
+                saveButton.setClickable(false);
                 List<String> users = Arrays.asList(mApplication.getUsername());
                 mApplication.getApi().sendRelay(relay.getUrl(), users, new RelayAPI.Callback<String>() {
                     @Override

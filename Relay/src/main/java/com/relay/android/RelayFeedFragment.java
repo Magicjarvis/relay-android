@@ -4,20 +4,13 @@ import android.app.Activity;
 import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
-import android.support.v4.app.ListFragment;
-import android.support.v7.app.ActionBarActivity;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.AbsListView;
 import android.widget.Adapter;
-import android.widget.AdapterView;
-import android.widget.HeaderViewListAdapter;
-import android.widget.ListAdapter;
 import android.widget.ListView;
-import android.widget.ProgressBar;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import java.util.Arrays;
@@ -33,20 +26,21 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
 public class RelayFeedFragment extends RelayListFragment {
     private static final String ARG_SECTION_NUMBER = "section_number";
 
-    private static Map<Direction, RelayAdapter> relayAdapterCache = new HashMap<Direction, RelayAdapter>();
-    private static Map<Direction, RelayList> relayListCache = new HashMap<Direction, RelayList>();
-    private static Set<Direction> staleDirections = new HashSet<Direction>();
+    private static Map<FeedType, RelayAdapter> relayAdapterCache = new HashMap<FeedType, RelayAdapter>();
+    private static Map<FeedType, RelayList> relayListCache = new HashMap<FeedType, RelayList>();
+    private static Set<FeedType> staleFeeds = new HashSet<FeedType>();
 
     private PullToRefreshLayout mPullToRefreshLayout;
 
 
     private static final String TAG = "JARVIS";
-    public enum Direction {
+    public enum FeedType {
+        TO,
         FROM,
-        TO
+        SAVED
     }
     private String username;
-    private Direction direction;
+    private FeedType feedType;
     private boolean atEndOfList;
     private View mFooterView;
     private View mEmptyView;
@@ -56,25 +50,20 @@ public class RelayFeedFragment extends RelayListFragment {
     public RelayFeedFragment(){
        // this is required
     }
-    public static RelayFeedFragment newInstance(String username, Direction d) {
+    public static RelayFeedFragment newInstance(String username, FeedType d) {
 
         RelayFeedFragment f = new RelayFeedFragment();
-        // TODO remove the direction enum
-        // use bundle args TODO
-        f.setDirection(d);
+        f.setFeedType(d);
         f.setUsername(username);
         f.setAtEndOfList(false);
         return f;
     }
 
     public static RelayFeedFragment getInstance(int sectionNumber, String username) {
-        RelayFeedFragment.Direction direction = RelayFeedFragment.Direction.TO;
-        if (sectionNumber == 2) {
-            direction = RelayFeedFragment.Direction.FROM;
-        }
+        FeedType feedType = FeedType.values()[sectionNumber - 1];
         Bundle args = new Bundle();
         args.putInt(ARG_SECTION_NUMBER, sectionNumber);
-        RelayFeedFragment f = RelayFeedFragment.newInstance(username, direction);
+        RelayFeedFragment f = RelayFeedFragment.newInstance(username, feedType);
         f.setArguments(args);
         return f;
     }
@@ -83,8 +72,8 @@ public class RelayFeedFragment extends RelayListFragment {
         this.atEndOfList = atEndOfList;
     }
 
-    public void setDirection(Direction direction) {
-        this.direction = direction;
+    public void setFeedType(FeedType feedType) {
+        this.feedType = feedType;
     }
 
     public void setUsername(String username) {
@@ -153,19 +142,12 @@ public class RelayFeedFragment extends RelayListFragment {
             }
         });
 
-        listView.setOnItemLongClickListener(new AdapterView.OnItemLongClickListener() {
-            @Override
-            public boolean onItemLongClick(AdapterView<?> adapterView, View view, int i, long l) {
-                deleteRelay(adapterView.getAdapter(), i);
-                return true;
-            }
-        });
-        if (relayAdapterCache.containsKey(direction)) {
+        if (relayAdapterCache.containsKey(feedType)) {
             Log.i(TAG, "Using relayAdapterCache instead of making request");
-            setListAdapter(relayAdapterCache.get(direction));
-            if (staleDirections.contains(direction)) {
+            setListAdapter(relayAdapterCache.get(feedType));
+            if (staleFeeds.contains(feedType)) {
                 loadRelays(0);
-                staleDirections.remove(direction);
+                staleFeeds.remove(feedType);
             }
         } else {
             Log.i(TAG, "loading relays fresh");
@@ -193,11 +175,11 @@ public class RelayFeedFragment extends RelayListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (relayListCache.containsKey(direction) && isVisible() && getListView() != null) {
-            RelayAdapter adapter = new RelayAdapter((RelayApplication)activity.getApplication(), relayListCache.get(direction).getRelays());
-            relayAdapterCache.put(direction, adapter);
+        if (relayListCache.containsKey(feedType) && isVisible() && getListView() != null) {
+            RelayAdapter adapter = new RelayAdapter((RelayApplication)activity.getApplication(), relayListCache.get(feedType).getRelays());
+            relayAdapterCache.put(feedType, adapter);
             setListAdapter(adapter);
-            relayListCache.remove(direction);
+            relayListCache.remove(feedType);
         }
         ((MainActivity) activity).onSectionAttached(getArguments().getInt(ARG_SECTION_NUMBER));
     }
@@ -241,19 +223,20 @@ public class RelayFeedFragment extends RelayListFragment {
     }
 
     public void lazyRefresh() {
-        if (staleDirections.contains(direction)) {
+        if (staleFeeds.contains(feedType)) {
             loadRelays(0);
-            staleDirections.remove(direction);
+            staleFeeds.remove(feedType);
         }
     }
 
     public static void evictCache() {
-        staleDirections.add(Direction.FROM);
-        staleDirections.add(Direction.TO);
+        staleFeeds.add(FeedType.FROM);
+        staleFeeds.add(FeedType.TO);
+        staleFeeds.add(FeedType.SAVED);
     }
 
     public void loadRelays(final int offset) {
-        getApi().fetchRelays(username, direction == Direction.FROM, offset, new RelayAPI.Callback<RelayList>() {
+        getApi().fetchRelays(username, feedType, offset, new RelayAPI.Callback<RelayList>() {
             @Override
             public void run(RelayList relayList) {
                 mPullToRefreshLayout.setRefreshComplete();
@@ -290,11 +273,11 @@ public class RelayFeedFragment extends RelayListFragment {
                     if (getActivity() != null) {
                         Log.i("jarvis", "we have activity");
                         RelayAdapter adapter = new RelayAdapter((RelayApplication)getActivity().getApplication(), relayList.getRelays());
-                        relayAdapterCache.put(direction, adapter);
+                        relayAdapterCache.put(feedType, adapter);
                         setListAdapter(adapter);
                     } else {
                         Log.i(TAG, "using the list cache");
-                        relayListCache.put(direction, relayList);
+                        relayListCache.put(feedType, relayList);
                     }
                 }
             }
