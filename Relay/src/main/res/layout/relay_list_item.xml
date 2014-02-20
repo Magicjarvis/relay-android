@@ -24,6 +24,7 @@
 
         <RelativeLayout
             android:id="@+id/body"
+            android:background="@drawable/item_selector"
             android:layout_below="@id/relay_image"
             android:padding="8dp"
             android:layout_width="match_parent"

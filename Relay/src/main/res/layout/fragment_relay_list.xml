@@ -29,7 +29,8 @@
         android:id="@android:id/list"
         android:background="@color/lighter_gray"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
+        android:layout_height="match_parent"
+        style="@style/NoStateListView">
     </ListView>
 
 </LinearLayout>
