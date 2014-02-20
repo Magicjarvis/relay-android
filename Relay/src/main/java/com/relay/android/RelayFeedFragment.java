@@ -180,10 +180,12 @@ public class RelayFeedFragment extends RelayListFragment {
         final Relay r = (Relay) listAdapter.getItem(i);
         RelayAdapter adapter = (RelayAdapter) getListAdapter();
         adapter.removeItem(i);
+        // Create toast here, because we have a context. May not have context when callback runs.
+        final Toast t = Toast.makeText(getActivity().getApplicationContext(), "Relay Deleted", Toast.LENGTH_SHORT);
         getApi().deleteRelay(username, r.getId(), new RelayAPI.Callback<String>() {
             @Override
             public void run(String s) {
-                Toast.makeText(getActivity().getApplicationContext(), "Relay Deleted", Toast.LENGTH_SHORT).show();
+                t.show();
             }
         });
     }
@@ -191,7 +193,7 @@ public class RelayFeedFragment extends RelayListFragment {
     @Override
     public void onAttach(Activity activity) {
         super.onAttach(activity);
-        if (relayListCache.containsKey(direction) && getListView() != null) {
+        if (relayListCache.containsKey(direction) && isVisible() && getListView() != null) {
             RelayAdapter adapter = new RelayAdapter(activity.getApplicationContext(), relayListCache.get(direction).getRelays());
             relayAdapterCache.put(direction, adapter);
             setListAdapter(adapter);
@@ -268,7 +270,7 @@ public class RelayFeedFragment extends RelayListFragment {
                     atEndOfList = true;
                     return;
                 } else {
-                    if (getListView().getFooterViewsCount() == 0) {
+                    if (isVisible() && getListView().getFooterViewsCount() == 0) {
                         getListView().addFooterView(mFooterView, null, false);
                     }
                     mLoadingView.setVisibility(View.VISIBLE);
