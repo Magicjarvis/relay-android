@@ -194,7 +194,7 @@ public class RelayFeedFragment extends RelayListFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (relayListCache.containsKey(direction) && isVisible() && getListView() != null) {
-            RelayAdapter adapter = new RelayAdapter(activity.getApplicationContext(), relayListCache.get(direction).getRelays());
+            RelayAdapter adapter = new RelayAdapter((RelayApplication)activity.getApplication(), relayListCache.get(direction).getRelays());
             relayAdapterCache.put(direction, adapter);
             setListAdapter(adapter);
             relayListCache.remove(direction);
@@ -289,7 +289,7 @@ public class RelayFeedFragment extends RelayListFragment {
                     Log.i("jarvis", "we dont have adapter");
                     if (getActivity() != null) {
                         Log.i("jarvis", "we have activity");
-                        RelayAdapter adapter = new RelayAdapter(getActivity().getApplicationContext(), relayList.getRelays());
+                        RelayAdapter adapter = new RelayAdapter((RelayApplication)getActivity().getApplication(), relayList.getRelays());
                         relayAdapterCache.put(direction, adapter);
                         setListAdapter(adapter);
                     } else {

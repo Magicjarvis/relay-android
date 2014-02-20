@@ -1,6 +1,8 @@
 package com.relay.android;
 
 import android.app.Application;
+import android.content.SharedPreferences;
+import android.preference.PreferenceManager;
 import android.util.Log;
 
 public class RelayApplication extends Application {
@@ -10,6 +12,11 @@ public class RelayApplication extends Application {
     public void onCreate() {
         super.onCreate();
         this.api = new RelayAPI(getApplicationContext());
+    }
+
+    public String getUsername() {
+        SharedPreferences sp = PreferenceManager.getDefaultSharedPreferences(this);
+        return sp.getString("username", null);
     }
 
     public RelayAPI getApi() {

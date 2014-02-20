@@ -2,6 +2,7 @@ package com.relay.android;
 
 import android.app.ActivityManager;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Color;
 import android.text.TextUtils;
 import android.util.Log;
@@ -12,6 +13,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.HeaderViewListAdapter;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -20,6 +22,7 @@ import com.android.volley.toolbox.NetworkImageView;
 import com.android.volley.toolbox.Volley;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -28,16 +31,16 @@ import java.util.List;
  */
 public class RelayAdapter extends BaseAdapter {
 
-    private Context mContext;
+    private RelayApplication mApplication;
     private List<Relay> mRelays;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
 
-    public RelayAdapter(Context context, List<Relay> relays) {
-        mContext = context;
+    public RelayAdapter(RelayApplication application, List<Relay> relays) {
+        mApplication = application;
         mRelays = relays == null ? new LinkedList<Relay>() : relays;
-        mRequestQueue = Volley.newRequestQueue(context);
-        int memClass = ((ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE))
+        mRequestQueue = Volley.newRequestQueue(mApplication);
+        int memClass = ((ActivityManager) mApplication.getSystemService(Context.ACTIVITY_SERVICE))
                 .getMemoryClass();
         // Use 1/8th of the available memory for this memory cache.
         int cacheSize = 1024 * 1024 * memClass / 8;
@@ -80,7 +83,7 @@ public class RelayAdapter extends BaseAdapter {
 
     @Override
     public View getView(int i, View view, ViewGroup viewGroup) {
-        View v = view != null ? view : LayoutInflater.from(mContext)
+        View v = view != null ? view : LayoutInflater.from(mApplication)
                 .inflate(R.layout.relay_list_item, null);
         final Relay relay = (Relay) getItem(i);
 
@@ -89,6 +92,35 @@ public class RelayAdapter extends BaseAdapter {
         TextView site = (TextView) v.findViewById(R.id.relay_site);
         TextView people = (TextView) v.findViewById(R.id.relay_people);
         NetworkImageView mImageView = (NetworkImageView) v.findViewById(R.id.relay_image);
+
+        Button saveButton = (Button) v.findViewById(R.id.save_button);
+        Button relayButton = (Button) v.findViewById(R.id.relay_button);
+
+        saveButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                List<String> users = Arrays.asList(mApplication.getUsername());
+                mApplication.getApi().sendRelay(relay.getUrl(), users, new RelayAPI.Callback<String>() {
+                    @Override
+                    public void run(String response) {
+                        Toast.makeText(mApplication, "Relay Saved", Toast.LENGTH_SHORT).show();
+                    }
+                });
+            }
+        });
+
+        relayButton.setOnClickListener(new View.OnClickListener() {
+
+            @Override
+            public void onClick(View v) {
+                Intent i = new Intent(v.getContext(), SendActivity.class);
+                i.putExtra("url", relay.getUrl());
+                // Must set this flag because context is not an Activity.
+                i.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                v.getContext().startActivity(i);
+            }
+        });
 
 
         // So effing dirty. What? I couldn't even think of a better way to do this.. other than
@@ -109,9 +141,6 @@ public class RelayAdapter extends BaseAdapter {
             site.setVisibility(View.GONE);
         }
         title.setText(relay.getTitle());
-
-
-
 
         if (relay.isRelayFromUser()) {
             people.setText("—" + TextUtils.join(", ", relay.getRecipients()));
