@@ -79,7 +79,7 @@ public class GcmIntentService extends IntentService {
                 new NotificationCompat.Builder(this)
                         .setDefaults(Notification.DEFAULT_ALL)
                         .setAutoCancel(true)
-                        .setSmallIcon(R.drawable.ic_launcher)
+                        .setSmallIcon(R.drawable.push_notif)
                         .setContentTitle("Relay from " + sender)
                         .setStyle(new NotificationCompat.BigTextStyle()
                                 .bigText(title))

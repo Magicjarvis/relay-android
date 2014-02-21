@@ -58,13 +58,13 @@ public class SendActivity extends RelayActivity {
         lv.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int i, long l) {
-                TextView tv = (TextView) view.findViewById(android.R.id.text1);
+                TextView tv = (TextView) view.findViewById(R.id.text1);
                 String user = tv.getText().toString();
                 if (mSelected.contains(user)) {
-                    view.setBackgroundColor(Color.BLACK);
+                    view.setBackgroundColor(getResources().getColor(R.color.white));
                     mSelected.remove(user);
                 } else {
-                    view.setBackgroundColor(Color.DKGRAY);
+                    view.setBackgroundColor(getResources().getColor(R.color.lighter_gray));
                     mSelected.add(tv.getText().toString());
                 }
 
@@ -86,12 +86,11 @@ public class SendActivity extends RelayActivity {
                 finish();
             }
         });
-        lv.setBackgroundColor(Color.BLACK);
         getApi().fetchFriends(new RelayAPI.Callback<FriendList>() {
             @Override
             public void run(FriendList friendList) {
                 String[] values = friendList.getUsers().toArray(new String[0]);
-                lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(), android.R.layout.simple_list_item_1, android.R.id.text1, values));
+                lv.setAdapter(new ArrayAdapter<String>(getApplicationContext(), R.layout.generic_list_item, R.id.text1, values));
             }
         });
     }

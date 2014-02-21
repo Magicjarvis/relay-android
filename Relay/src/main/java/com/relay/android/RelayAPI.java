@@ -50,17 +50,17 @@ public class RelayAPI {
     }};
 
     private RequestQueue mRequestQueue;
-    private Set<String> mInFlightRequests;
-    private Context mContext;
+    private static final Set<String> IN_FLIGHT_REQUEST_SET = new HashSet<String>();
+    private RelayApplication mContext;
+    private FriendList mFriendList;
 
-    public RelayAPI(Context context) {
+    public RelayAPI(RelayApplication context) {
         mRequestQueue = Volley.newRequestQueue(context);
         mContext = context;
-        mInFlightRequests = new HashSet<String>();
     }
 
     public void deleteRelay(final String username, final long relay_id, final Callback<String> callback) {
-        if (mInFlightRequests.contains(DELETE_RELAY_ENDPOINT)) {
+        if (IN_FLIGHT_REQUEST_SET.contains(DELETE_RELAY_ENDPOINT)) {
             return;
         }
 
@@ -68,13 +68,13 @@ public class RelayAPI {
                 DELETE_RELAY_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                mInFlightRequests.remove(DELETE_RELAY_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(DELETE_RELAY_ENDPOINT);
                 callback.run(s);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(DELETE_RELAY_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(DELETE_RELAY_ENDPOINT);
                 // errors? what are those.
             }
         }) {
@@ -90,19 +90,19 @@ public class RelayAPI {
 
         sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
-        mInFlightRequests.add(DELETE_RELAY_ENDPOINT);
+        IN_FLIGHT_REQUEST_SET.add(DELETE_RELAY_ENDPOINT);
     }
 
 
     public void sendRelay(final String url, final List<String> recipients, final Callback<String> callback) {
-        if (mInFlightRequests.contains(RELAYS_ENDPOINT)) {
+        if (IN_FLIGHT_REQUEST_SET.contains(RELAYS_ENDPOINT)) {
             return;
         }
-        Log.i("JARVIS", "sending: "+url+" to: "+recipients);
+        Log.i("JARVIS", "sending: " + url + " to: " + recipients);
         StringRequest sr = new StringRequest(Request.Method.POST, RELAYS_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                mInFlightRequests.remove(RELAYS_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(RELAYS_ENDPOINT);
                 callback.run(s);
             }
         }, new Response.ErrorListener() {
@@ -126,20 +126,25 @@ public class RelayAPI {
 
         sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
-        mInFlightRequests.add(RELAYS_ENDPOINT);
+        IN_FLIGHT_REQUEST_SET.add(RELAYS_ENDPOINT);
 
 
     }
 
     public void fetchFriends(final Callback<FriendList> callback) {
-        if (mInFlightRequests.contains(FRIENDS_ENDPOINT)) {
+        if (mFriendList != null || IN_FLIGHT_REQUEST_SET.contains(FRIENDS_ENDPOINT)) {
+            callback.run(mFriendList);
             return;
         }
         Request request = new GsonRequest<FriendList>(FRIENDS_ENDPOINT,
             FriendList.class, null, new Response.Listener<FriendList>() {
             @Override
             public void onResponse(FriendList friendList) {
-                mInFlightRequests.remove(FRIENDS_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(FRIENDS_ENDPOINT);
+                if (friendList.getUsers().contains(mContext.getUsername())) {
+                    friendList.getUsers().remove(mContext.getUsername());
+                }
+                mFriendList = friendList;
                 callback.run(friendList);
 
             }
@@ -152,12 +157,12 @@ public class RelayAPI {
         });
         request.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(request);
-        mInFlightRequests.add(FRIENDS_ENDPOINT);
+        IN_FLIGHT_REQUEST_SET.add(FRIENDS_ENDPOINT);
 
     }
 
     public void unRegisterGCM(final String username, final Callback<String> callback) {
-        if (mInFlightRequests.contains(UNREGISTER_ENDPOINT)) {
+        if (IN_FLIGHT_REQUEST_SET.contains(UNREGISTER_ENDPOINT)) {
             return;
         }
         Log.i("JARVIS", "trying to unregister gcm");
@@ -165,13 +170,13 @@ public class RelayAPI {
                 UNREGISTER_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                mInFlightRequests.remove(UNREGISTER_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(UNREGISTER_ENDPOINT);
                 callback.run(s);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(UNREGISTER_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(UNREGISTER_ENDPOINT);
                 // errors? what are those.
             }
         }) {
@@ -191,24 +196,24 @@ public class RelayAPI {
 
         sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
-        mInFlightRequests.add(UNREGISTER_ENDPOINT);
+        IN_FLIGHT_REQUEST_SET.add(UNREGISTER_ENDPOINT);
 
     }
     public void attemptLogin(final String username, final String password, final Callback<String> callback) {
-        if (mInFlightRequests.contains(LOGIN_ENDPOINT)) {
+        if (IN_FLIGHT_REQUEST_SET.contains(LOGIN_ENDPOINT)) {
             return;
         }
         StringRequest sr = new StringRequest(Request.Method.POST,
                 LOGIN_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {
-                mInFlightRequests.remove(LOGIN_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(LOGIN_ENDPOINT);
                 callback.run(s);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(LOGIN_ENDPOINT);
+                IN_FLIGHT_REQUEST_SET.remove(LOGIN_ENDPOINT);
                 // errors? what are those.
             }
         }) {
@@ -229,13 +234,13 @@ public class RelayAPI {
 
         sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
-        mInFlightRequests.add(LOGIN_ENDPOINT);
+        IN_FLIGHT_REQUEST_SET.add(LOGIN_ENDPOINT);
 
     }
 
     public void fetchRelays(String username, FeedType feedtype, int offset, final Callback<RelayList> callback) {
         final String baseUrl = FEED_TYPE_URL_MAP.get(feedtype) + username;
-        if (mInFlightRequests.contains(baseUrl)) {
+        if (IN_FLIGHT_REQUEST_SET.contains(baseUrl)) {
             Log.i("jarvis", "in flight: " + baseUrl);
             return;
         }
@@ -244,20 +249,20 @@ public class RelayAPI {
         final Request request = new GsonRequest<RelayList>(url, RelayList.class, null, new Response.Listener<RelayList>() {
             @Override
             public void onResponse(RelayList relayList) {
-                mInFlightRequests.remove(baseUrl);
+                IN_FLIGHT_REQUEST_SET.remove(baseUrl);
                 Log.i("jarvis", "removed "+baseUrl);
                 callback.run(relayList);
             }
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                mInFlightRequests.remove(baseUrl);
+                IN_FLIGHT_REQUEST_SET.remove(baseUrl);
                 Log.i("JARVIS", "There was an error");
             }
         });
         request.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(request);
-        mInFlightRequests.add(baseUrl);
+        IN_FLIGHT_REQUEST_SET.add(baseUrl);
     }
 
     public static interface Callback<T> {

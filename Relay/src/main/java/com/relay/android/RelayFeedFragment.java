@@ -120,25 +120,23 @@ public class RelayFeedFragment extends RelayListFragment {
                 return true;
             }
         });
-        if (feedType != FeedType.FROM) {
-            listView.setOnTouchListener(touchListener);
-            final AbsListView.OnScrollListener touchScrollListener = touchListener.makeScrollListener();
-            listView.setOnScrollListener(new AbsListView.OnScrollListener() {
-                @Override
-                public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                    touchScrollListener.onScrollStateChanged(absListView, scrollState);
-                }
+        listView.setOnTouchListener(touchListener);
+        final AbsListView.OnScrollListener touchScrollListener = touchListener.makeScrollListener();
+        listView.setOnScrollListener(new AbsListView.OnScrollListener() {
+            @Override
+            public void onScrollStateChanged(AbsListView absListView, int scrollState) {
+                touchScrollListener.onScrollStateChanged(absListView, scrollState);
+            }
 
-                @Override
-                public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
-                    touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
-                    if (atEndOfList) return;
-                    if (mFooterView != null && mFooterView.isShown()) {
-                        loadRelays(getListAdapter().getCount());
-                    }
+            @Override
+            public void onScroll(AbsListView absListView, int firstVisibleItem, int visibleItemCount, int totalItemCount) {
+                touchScrollListener.onScroll(absListView, firstVisibleItem, visibleItemCount, totalItemCount);
+                if (atEndOfList) return;
+                if (mFooterView != null && mFooterView.isShown()) {
+                    loadRelays(getListAdapter().getCount());
                 }
-            });
-        }
+            }
+        });
 
         if (relayAdapterCache.containsKey(feedType)) {
             Log.i(TAG, "Using relayAdapterCache instead of making request");
@@ -237,7 +235,8 @@ public class RelayFeedFragment extends RelayListFragment {
         staleFeeds.add(FeedType.SAVED);
     }
 
-    public void loadRelays(final int offset) {
+    public void loadRelays(int baseOffset) {
+        final int offset = baseOffset;
         getApi().fetchRelays(username, feedType, offset, new RelayAPI.Callback<RelayList>() {
             @Override
             public void run(RelayList relayList) {

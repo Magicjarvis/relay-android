@@ -11,7 +11,7 @@ public class RelayApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        this.api = new RelayAPI(getApplicationContext());
+        this.api = new RelayAPI(this);
     }
 
     public String getUsername() {

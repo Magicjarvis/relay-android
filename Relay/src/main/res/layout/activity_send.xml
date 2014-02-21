@@ -6,6 +6,7 @@
 
     <ListView
         android:divider="@null"
+        android:background="@color/white"
         android:dividerHeight="0dp"
         android:id="@+id/friend_list"
         android:layout_width="fill_parent"

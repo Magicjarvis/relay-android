@@ -65,14 +65,15 @@ public class LandingActivity extends ActionBarActivity {
         public View onCreateView(LayoutInflater inflater, ViewGroup container,
                 Bundle savedInstanceState) {
             View rootView = inflater.inflate(R.layout.fragment_landing, container, false);
-            View loginButton = (View) rootView.findViewById(R.id.login_button);
-            loginButton.setOnClickListener(new View.OnClickListener() {
+            View.OnClickListener l = new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
                     startActivity(new Intent(getActivity(), LoginActivity.class));
                     getActivity().finish();
                 }
-            });
+            };
+            rootView.findViewById(R.id.login_button).setOnClickListener(l);
+            rootView.findViewById(R.id.register_button).setOnClickListener(l);
             return rootView;
         }
     }

@@ -4,6 +4,6 @@
     android:layout_height="match_parent"
     android:choiceMode="singleChoice"
     android:divider="@color/lighter_gray"
-    android:dividerHeight="2dp"
-    android:background="@color/dark_gray"
+    android:dividerHeight="0dp"
+    android:background="@color/white"
     tools:context="com.relay.android.NavigationDrawerFragment" />

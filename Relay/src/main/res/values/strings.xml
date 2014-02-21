@@ -2,7 +2,7 @@
 <resources>
 
     <string name="app_name">Relay</string>
-    <string name="title_section1">Relay</string>
+    <string name="title_section1">Relays</string>
     <string name="title_section2">Sent</string>
     <string name="title_section3">Saved</string>
     <string name="navigation_drawer_open">Open navigation drawer</string>
@@ -14,6 +14,6 @@
     <string name="hello_world">Hello world!</string>
     <string name="title_activity_root">Relay</string>
     <string name="title_activity_landing">LandingActivity</string>
-    <string name="no_relays">No Relays</string>
+    <string name="no_relays">No Relays :(</string>
 
 </resources>
