@@ -36,8 +36,9 @@ public class RelayAdapter extends BaseAdapter {
     private List<Relay> mRelays;
     private RequestQueue mRequestQueue;
     private ImageLoader mImageLoader;
+    private FeedType mFeedType;
 
-    public RelayAdapter(RelayApplication application, List<Relay> relays) {
+    public RelayAdapter(RelayApplication application, List<Relay> relays, FeedType feedType) {
         mApplication = application;
         mRelays = relays == null ? new LinkedList<Relay>() : relays;
         mRequestQueue = Volley.newRequestQueue(mApplication);
@@ -46,6 +47,7 @@ public class RelayAdapter extends BaseAdapter {
         // Use 1/8th of the available memory for this memory cache.
         int cacheSize = 1024 * 1024 * memClass / 8;
         mImageLoader = new ImageLoader(mRequestQueue, new BitmapLruCache(cacheSize));
+        mFeedType = feedType;
     }
 
     @Override
@@ -104,8 +106,7 @@ public class RelayAdapter extends BaseAdapter {
                 saveButton.setText("Saved");
                 saveButton.setTextColor(ColorStateList.valueOf(R.color.light_gray));
                 saveButton.setClickable(false);
-                List<String> users = Arrays.asList(mApplication.getUsername());
-                mApplication.getApi().sendRelay(relay.getUrl(), users, new RelayAPI.Callback<String>() {
+                mApplication.getApi().sendRelay(relay.getUrl(), new ArrayList<String>(), new RelayAPI.Callback<String>() {
                     @Override
                     public void run(String response) {
                         RelayFeedFragment.markSavedStale();
@@ -147,10 +148,13 @@ public class RelayAdapter extends BaseAdapter {
         }
         title.setText(relay.getTitle());
 
-        if (relay.isRelayFromUser()) {
+        if (mFeedType == FeedType.TO) {
+            people.setText("—" + relay.getSender());
+        } else if (mFeedType == FeedType.FROM) {
             people.setText("—" + TextUtils.join(", ", relay.getRecipients()));
         } else {
-            people.setText("—" + relay.getSender());
+            saveButton.setVisibility(View.GONE);
+            people.setText("");
         }
 
         return v;

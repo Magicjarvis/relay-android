@@ -34,11 +34,6 @@ public class RelayFeedFragment extends RelayListFragment {
 
 
     private static final String TAG = "JARVIS";
-    public enum FeedType {
-        TO,
-        FROM,
-        SAVED
-    }
     private String username;
     private FeedType feedType;
     private boolean atEndOfList;
@@ -178,7 +173,7 @@ public class RelayFeedFragment extends RelayListFragment {
     public void onAttach(Activity activity) {
         super.onAttach(activity);
         if (relayListCache.containsKey(feedType) && isVisible() && getListView() != null) {
-            RelayAdapter adapter = new RelayAdapter((RelayApplication)activity.getApplication(), relayListCache.get(feedType).getRelays());
+            RelayAdapter adapter = new RelayAdapter((RelayApplication)activity.getApplication(), relayListCache.get(feedType).getRelays(), feedType);
             relayAdapterCache.put(feedType, adapter);
             setListAdapter(adapter);
             relayListCache.remove(feedType);
@@ -278,7 +273,7 @@ public class RelayFeedFragment extends RelayListFragment {
                     Log.i("jarvis", "we dont have adapter");
                     if (getActivity() != null) {
                         Log.i("jarvis", "we have activity");
-                        RelayAdapter adapter = new RelayAdapter((RelayApplication)getActivity().getApplication(), relayList.getRelays());
+                        RelayAdapter adapter = new RelayAdapter((RelayApplication)getActivity().getApplication(), relayList.getRelays(), feedType);
                         relayAdapterCache.put(feedType, adapter);
                         setListAdapter(adapter);
                     } else {

@@ -7,6 +7,7 @@ import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.DefaultRetryPolicy;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -15,7 +16,6 @@ import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
 
 
-import com.relay.android.RelayFeedFragment.FeedType;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -36,6 +36,11 @@ public class RelayAPI {
     private static final String FRIENDS_ENDPOINT = API_URL + "/users";
     private static final String LOGIN_ENDPOINT = API_URL + "/login";
     private static final String UNREGISTER_ENDPOINT = API_URL + "/unregister";
+
+    private static final int SERVER_TIMEOUT = 1000;
+    private static final int MAX_RETRIES = 3;
+
+    private static final DefaultRetryPolicy RETRY_POLICY = new DefaultRetryPolicy(SERVER_TIMEOUT, MAX_RETRIES, DefaultRetryPolicy.DEFAULT_BACKOFF_MULT);
 
     private static final Map<FeedType, String> FEED_TYPE_URL_MAP = new HashMap<FeedType, String>() {{
         put(FeedType.FROM, RELAYS_FROM_ENDPOINT);
@@ -83,6 +88,7 @@ public class RelayAPI {
             }
         };
 
+        sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
         mInFlightRequests.add(DELETE_RELAY_ENDPOINT);
     }
@@ -118,6 +124,7 @@ public class RelayAPI {
             }
         };
 
+        sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
         mInFlightRequests.add(RELAYS_ENDPOINT);
 
@@ -143,6 +150,7 @@ public class RelayAPI {
                     //Log.e("VolleyError", volleyError.toString());
                 }
         });
+        request.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(request);
         mInFlightRequests.add(FRIENDS_ENDPOINT);
 
@@ -152,6 +160,7 @@ public class RelayAPI {
         if (mInFlightRequests.contains(UNREGISTER_ENDPOINT)) {
             return;
         }
+        Log.i("JARVIS", "trying to unregister gcm");
         StringRequest sr = new StringRequest(Request.Method.POST,
                 UNREGISTER_ENDPOINT, new Response.Listener<String>() {
             @Override
@@ -180,6 +189,7 @@ public class RelayAPI {
             }
         };
 
+        sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
         mInFlightRequests.add(UNREGISTER_ENDPOINT);
 
@@ -217,6 +227,7 @@ public class RelayAPI {
             }
         };
 
+        sr.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(sr);
         mInFlightRequests.add(LOGIN_ENDPOINT);
 
@@ -244,6 +255,7 @@ public class RelayAPI {
                 Log.i("JARVIS", "There was an error");
             }
         });
+        request.setRetryPolicy(RETRY_POLICY);
         mRequestQueue.add(request);
         mInFlightRequests.add(baseUrl);
     }
