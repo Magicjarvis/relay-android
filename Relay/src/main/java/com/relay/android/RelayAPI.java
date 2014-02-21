@@ -92,6 +92,7 @@ public class RelayAPI {
         if (mInFlightRequests.contains(RELAYS_ENDPOINT)) {
             return;
         }
+        Log.i("JARVIS", "sending: "+url+" to: "+recipients);
         StringRequest sr = new StringRequest(Request.Method.POST, RELAYS_ENDPOINT, new Response.Listener<String>() {
             @Override
             public void onResponse(String s) {

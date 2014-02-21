@@ -108,6 +108,7 @@ public class RelayAdapter extends BaseAdapter {
                 mApplication.getApi().sendRelay(relay.getUrl(), users, new RelayAPI.Callback<String>() {
                     @Override
                     public void run(String response) {
+                        RelayFeedFragment.markSavedStale();
                         Toast.makeText(mApplication, "Relay Saved", Toast.LENGTH_SHORT).show();
                     }
                 });
