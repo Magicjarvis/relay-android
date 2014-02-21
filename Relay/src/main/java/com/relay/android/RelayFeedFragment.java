@@ -78,6 +78,7 @@ public class RelayFeedFragment extends RelayListFragment {
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setRetainInstance(true);
     }
 
     @Override
