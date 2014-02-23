@@ -161,9 +161,9 @@ public class RelayFeedFragment extends RelayListFragment {
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
         outState.putString("username", username);
         outState.putSerializable("feedType", feedType);
-        super.onSaveInstanceState(outState);
     }
 
     private void deleteRelay(Adapter listAdapter, int i) {

@@ -24,6 +24,7 @@ public class MainActivity extends RelayActivity
      * Used to store the last screen title. For use in {@link #restoreActionBar()}.
      */
     private CharSequence mTitle;
+    private int mPosition;
     private static String mUsername;
 
     @Override
@@ -35,6 +36,11 @@ public class MainActivity extends RelayActivity
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         mUsername = prefs.getString("username", null);
 
+        if (savedInstanceState != null) {
+            mPosition = savedInstanceState.getInt("position", 1);
+        } else {
+            mPosition = 1;
+        }
 
         mNavigationDrawerFragment = (NavigationDrawerFragment)
                 getSupportFragmentManager().findFragmentById(R.id.navigation_drawer);
@@ -48,8 +54,14 @@ public class MainActivity extends RelayActivity
 
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, RelayFeedFragment.getInstance(1, mUsername))
+                .replace(R.id.container, RelayFeedFragment.getInstance(mPosition, mUsername))
                 .commit();
+    }
+
+    @Override
+    protected void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
+        outState.putInt("position", mPosition);
     }
 
     @Override
@@ -57,6 +69,7 @@ public class MainActivity extends RelayActivity
         if (mNavigationDrawerFragment == null) {
             return;
         }
+        mPosition = position+1;
         // update the main content by replacing fragments
         SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(getApplicationContext());
         if (prefs.contains("username")) {
@@ -64,7 +77,7 @@ public class MainActivity extends RelayActivity
         }
         FragmentManager fragmentManager = getSupportFragmentManager();
         fragmentManager.beginTransaction()
-                .replace(R.id.container, RelayFeedFragment.getInstance(position + 1, mUsername))
+                .replace(R.id.container, RelayFeedFragment.getInstance(mPosition, mUsername))
                 .commit();
     }
 
