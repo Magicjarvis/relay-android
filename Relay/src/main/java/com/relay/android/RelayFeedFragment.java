@@ -79,6 +79,12 @@ public class RelayFeedFragment extends RelayListFragment {
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setRetainInstance(true);
+        if (feedType == null) {
+            feedType = (FeedType)savedInstanceState.getSerializable("feedType");
+        }
+        if (username == null) {
+            username = savedInstanceState.getString("username", null);
+        }
     }
 
     @Override
@@ -153,6 +159,12 @@ public class RelayFeedFragment extends RelayListFragment {
         return root;
     }
 
+    @Override
+    public void onSaveInstanceState(Bundle outState) {
+        outState.putString("username", username);
+        outState.putSerializable("feedType", feedType);
+        super.onSaveInstanceState(outState);
+    }
 
     private void deleteRelay(Adapter listAdapter, int i) {
         final Relay r = (Relay) listAdapter.getItem(i);
