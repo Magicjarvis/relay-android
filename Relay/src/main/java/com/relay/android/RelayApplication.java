@@ -22,7 +22,7 @@ public class RelayApplication extends Application {
     public RelayAPI getApi() {
         return api;
     }
-    private static boolean activityVisible = true;
+    private static boolean activityVisible = false;
     private static boolean feedVisible = false;
     private static RelayFeedFragment feed = null;
 
